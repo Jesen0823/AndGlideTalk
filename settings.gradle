@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AndGlideTalk"
 include ':app'
+include ':CustomGlide'
