@@ -39,8 +39,15 @@ put：
     entryRemoved
     2.trimToSize 移除哪些最近没有使用的元素 ---》 entryRemoved
 
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+---
+4. Glide手写实现之磁盘缓存
 
-4.Glide手写实现之磁盘缓存
+以文件形式保存在磁盘，保存时间比较长
+也是LRU算法， Android官方没有提供相关Api,  
+三方提供了DiskLruCache:[https://github.com/JakeWharton/DiskLruCache](https://github.com/JakeWharton/DiskLruCache)
+仍然是LRU算法，LinkHashMap访问排序
+
+
+
 5.Glide手写实现之生命周期
 6.Glide手写实现之加载图片

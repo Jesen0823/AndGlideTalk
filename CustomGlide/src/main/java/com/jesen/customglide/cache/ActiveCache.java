@@ -1,9 +1,9 @@
 package com.jesen.customglide.cache;
 
-import com.netease.customglide.Tool;
-import com.netease.customglide.resource.Key;
-import com.netease.customglide.resource.Value;
-import com.netease.customglide.resource.ValueCallback;
+
+import com.jesen.customglide.Tool;
+import com.jesen.customglide.resource.Value;
+import com.jesen.customglide.resource.ValueCallback;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
