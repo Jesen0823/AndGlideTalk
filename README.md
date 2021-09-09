@@ -47,7 +47,13 @@ put：
 三方提供了DiskLruCache:[https://github.com/JakeWharton/DiskLruCache](https://github.com/JakeWharton/DiskLruCache)
 仍然是LRU算法，LinkHashMap访问排序
 
+----
+5. Glide手写实现之生命周期
 
+生命周期的管理：Application不能去管理，FragmentActivity可以去管理，Activity也可以去管理
+管理的方式：在Activity组件上 附件Fragment，通过Fragment监听组件的生命周期
 
-5.Glide手写实现之生命周期
+为什么发送一次Handler？
+Android基于Handler消息的，LAUNCH_ACTIVITY，为了使fragment不要再在排队中
+
 6.Glide手写实现之加载图片
