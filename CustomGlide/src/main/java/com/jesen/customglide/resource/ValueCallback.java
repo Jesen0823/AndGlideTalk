@@ -1,7 +1,7 @@
 package com.jesen.customglide.resource;
 
 /**
- * 专门给Value，不再使用了的回调接口
+ * 专门给Value，不再使用了，的回调接口
  */
 public interface ValueCallback {
 
@@ -10,6 +10,6 @@ public interface ValueCallback {
      * @param key
      * @param value
      */
-    public void valueNonUseListener(String key, Value value);
+    void valueNonUseListener(String key, Value value);
 
 }

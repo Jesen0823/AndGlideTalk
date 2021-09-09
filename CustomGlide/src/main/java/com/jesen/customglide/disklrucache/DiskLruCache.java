@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * A cache that uses a bounded amount of space on a filesystem. Each cache
  * entry has a string key and a fixed number of values. Each key must match
- * the regex <strong>[a-z0-9_-]{1,64}</strong>. Values are byte sequences,
+ * the regex <strong>[a-z0-9_-]{1,120}</strong>. Values are byte sequences,
  * accessible as streams or files. Each value must be between {@code 0} and
  * {@code Integer.MAX_VALUE} bytes in length.
  *
@@ -92,7 +92,8 @@ public final class DiskLruCache implements Closeable {
   static final String MAGIC = "libcore.io.DiskLruCache";
   static final String VERSION_1 = "1";
   static final long ANY_SEQUENCE_NUMBER = -1;
-  static final Pattern LEGAL_KEY_PATTERN = Pattern.compile("[a-z0-9_-]{1,64}");
+  static final String STRING_KEY_PATTERN = "[a-z0-9_-]{1,120}";
+  static final Pattern LEGAL_KEY_PATTERN = Pattern.compile(STRING_KEY_PATTERN);
   private static final String CLEAN = "CLEAN";
   private static final String DIRTY = "DIRTY";
   private static final String REMOVE = "REMOVE";
@@ -223,8 +224,6 @@ public final class DiskLruCache implements Closeable {
       try {
         cache.readJournal();
         cache.processJournal();
-        cache.journalWriter = new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(cache.journalFile, true), Util.US_ASCII));
         return cache;
       } catch (IOException journalIsCorrupt) {
         System.out
@@ -271,6 +270,14 @@ public final class DiskLruCache implements Closeable {
         }
       }
       redundantOpCount = lineCount - lruEntries.size();
+
+      // If we ended on a truncated line, rebuild the journal before appending to it.
+      if (reader.hasUnterminatedLine()) {
+        rebuildJournal();
+      } else {
+        journalWriter = new BufferedWriter(new OutputStreamWriter(
+            new FileOutputStream(journalFile, true), Util.US_ASCII));
+      }
     } finally {
       Util.closeQuietly(reader);
     }
@@ -657,7 +664,8 @@ public final class DiskLruCache implements Closeable {
   private void validateKey(String key) {
     Matcher matcher = LEGAL_KEY_PATTERN.matcher(key);
     if (!matcher.matches()) {
-      throw new IllegalArgumentException("keys must match regex [a-z0-9_-]{1,64}: \"" + key + "\"");
+      throw new IllegalArgumentException("keys must match regex "
+              + STRING_KEY_PATTERN + ": \"" + key + "\"");
     }
   }
 
@@ -766,6 +774,11 @@ public final class DiskLruCache implements Closeable {
      * IOExceptions.
      */
     public OutputStream newOutputStream(int index) throws IOException {
+      if (index < 0 || index >= valueCount) {
+        throw new IllegalArgumentException("Expected index " + index + " to "
+                + "be greater than 0 and less than the maximum value count "
+                + "of " + valueCount);
+      }
       synchronized (DiskLruCache.this) {
         if (entry.currentEditor != this) {
           throw new IllegalStateException();

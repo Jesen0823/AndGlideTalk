@@ -11,7 +11,7 @@ import com.jesen.customglide.glide.Glide;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TEST_IMAGE_1 = "https://tse1-mm.cn.bing.net/th/id/R-C.de18d75795b84bee354740a1f810d10f?rik=IppVlYxT%2fQ%2b6tg&riu=http%3a%2f%2fcdn.static.iftour.com%2fupload%2fimages%2fupload%2f20180828%2f5b84bbb3aa60a.jpg&ehk=s1W4KnXVIzbFi%2fPPvcm4jMxtn8ZIDtt%2foD50ayVpWMA%3d&risl=&pid=ImgRaw&r=0";
+    private static final String TEST_IMAGE_1 = "https://img1.baidu.com/it/u=1569546883,489283881&fm=26&fmt=auto&gp=0.jpg";
 
     private ImageView iv1,iv2,iv3;
     private Button testBt1,testBt2,testBt3;

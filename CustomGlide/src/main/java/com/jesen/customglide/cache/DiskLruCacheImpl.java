@@ -1,11 +1,11 @@
 package com.jesen.customglide.cache;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.text.TextUtils;
+import android.os.Environment;
 import android.util.Log;
 
+import com.jesen.customglide.BaseApplication;
 import com.jesen.customglide.Tool;
 import com.jesen.customglide.disklrucache.DiskLruCache;
 import com.jesen.customglide.resource.Value;
@@ -19,72 +19,67 @@ import java.io.OutputStream;
  * 磁盘缓存的封装
  */
 public class DiskLruCacheImpl {
+    private final String TAG = DiskLruCacheImpl.class.getSimpleName();
 
-    private static final String TAG = "DiskLruCacheImpl";
-    private static final String DISK_LRU_CACHE_DIR = "lru_cache_dir";
-    private static String PATH = "";
+    private final String DISK_LRU_CACHE_DIR = "lru_cache_dir"; // 磁盘缓存的的目录
 
-    // 缓存的版本号，修改后原有缓存失效
-    private final int CACHE_VERSION = 100;
+    // 版本号，一旦修改这个版本号，之前的缓存失效
+    private final int APP_VERSION = 1;
+    // 通常情况下都是1
     private final int VALUE_COUNT = 1;
-    private final long MAX_SIZE = 1024 * 1024 * 10;
 
+    // 配置缓存大小
+    private final long MAX_SIZE = 1024 * 1024 * 100;
 
     private DiskLruCache diskLruCache;
-    private Context mContext;
 
-    public DiskLruCacheImpl(Context context) {
-        mContext = context;
-        PATH = context.getCacheDir().getAbsolutePath();
-        String cachePath = PATH + File.separator + DISK_LRU_CACHE_DIR;
-
-        File file = new File(cachePath);
-        if (!file.exists()){
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public DiskLruCacheImpl() {
+        File file = new File(BaseApplication.getApplication().getCacheDir() + File.separator + DISK_LRU_CACHE_DIR);
         try {
-            diskLruCache = DiskLruCache.open(file, CACHE_VERSION, VALUE_COUNT, MAX_SIZE);
+            diskLruCache = DiskLruCache.open(file, APP_VERSION, VALUE_COUNT, MAX_SIZE);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void put(String key, Value value) {
+        Tool.checkNotEmpty(key);
+
         DiskLruCache.Editor editor = null;
         OutputStream outputStream = null;
         try {
             editor = diskLruCache.edit(key);
-            // index不能大于 VALUE_COUNT
+            // index 不能大于 VALUE_COUNT
             outputStream = editor.newOutputStream(0);
             Bitmap bitmap = value.getmBitmap();
-            // 将Bitmap写入 outputStream
+            // 把bitmap写入到outputStream
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            // 失败
             try {
                 editor.abort();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-                Log.w(TAG, "put failed.err: " + e.toString());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                Log.e(TAG, "put: editor.abort() e:" + e.getMessage());
             }
         } finally {
             try {
                 editor.commit();
+
                 diskLruCache.flush();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.w(TAG, "commit failed.err: " + e.toString());
+                Log.e(TAG, "put: editor.commit(); e:" + e.getMessage());
             }
+
             if (outputStream != null) {
                 try {
                     outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    Log.e(TAG, "put: outputStream.close(); e:" + e.getMessage());
                 }
             }
         }
@@ -93,26 +88,32 @@ public class DiskLruCacheImpl {
     public Value get(String key) {
         Tool.checkNotEmpty(key);
 
-        Value value = Value.getInstance();
         InputStream inputStream = null;
         try {
             DiskLruCache.Snapshot snapshot = diskLruCache.get(key);
-            if (snapshot != null) {
+            // 判断快照不为null的情况下，在去读取操作
+            if (null != snapshot) {
+                Value value = Value.getInstance();
+                // index 不能大于 VALUE_COUNT
                 inputStream = snapshot.getInputStream(0);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                 value.setmBitmap(bitmap);
-                // 保存key
+                // 保存key 唯一标识
                 value.setKey(key);
+                return value;
             }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (null != inputStream) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, "get: inputStream.close(); e:" + e.getMessage());
+                }
             }
         }
-        return value;
+        return null; // 为了后续好判断
     }
 }

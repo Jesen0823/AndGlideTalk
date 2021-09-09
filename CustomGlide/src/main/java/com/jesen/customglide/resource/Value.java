@@ -38,6 +38,7 @@ public class Value {
     private String key;
 
     public Bitmap getmBitmap() {
+        Log.d("Value","--bitmap:"+mBitmap);
         return mBitmap;
     }
 
@@ -90,7 +91,8 @@ public class Value {
      * count -- <= 0  不再使用了
      */
     public void nonUseAction() {
-        if (count -- <= 0 && callback != null) {
+        count--;
+        if (count <= 0 && callback != null) {
             // 回调告诉外界，不再使用了
             callback.valueNonUseListener(key, this);
         }
