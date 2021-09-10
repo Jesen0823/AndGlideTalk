@@ -1,32 +1,32 @@
 package com.jesen.customglide;
 
-import android.util.Log;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import com.jesen.customglide.cache.MemoryCache;
-import com.jesen.customglide.cache.MemoryCacheCallback;
-import com.jesen.customglide.resource.Value;
-
-
+/**
+ * LRU算法，LinkedHashMap已经实现了
+ * 最新访问的元素会被排在最上面，最上面的元素最不易被回收
+ * */
 public class Test {
 
-    private static final String TAG = "Test";
+    public static void main(String[] args) {
 
-    // 伪代码
-    public void test() {
+        // true表示支持 访问排序
+        LinkedHashMap<String, Integer> map = new LinkedHashMap(0, 0.75F, true);
 
-        MemoryCache memoryCache = new MemoryCache(5);
-        memoryCache.put("aasfsdfsdf", new Value());
+        map.put("一", 1); // 最开始添加的，它的LRU算法移除是最高的(越容易被回收)
+        map.put("二", 2);
+        map.put("三", 3);
+        map.put("四", 4);
+        map.put("五", 5); // 最后添加的，它的LRU算法移除是最高的(越难被回收)
 
-        final Value v = memoryCache.get("aasfsdfsdf");
+        // 使用了某个元素
+        map.get("三"); // 使用了一次，就越不可能被回收了
 
-        memoryCache.shoudonRemove("aasfsdfsdf");
+        for (Map.Entry<String, Integer> l : map.entrySet()) {
+            System.out.println(l.getValue());
+        }
 
-        memoryCache.setMemoryCacheCallback(new MemoryCacheCallback() {
-            @Override
-            public void entryRemovedMemoryCache(String key, Value oldValue) {
-                Log.d(TAG, "entryRemovedMemoryCache: 内存缓存中的元素被移除了【被动移除】 value:" + oldValue + " key:" + key);
-            }
-        });
     }
 
 
