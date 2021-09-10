@@ -9,9 +9,11 @@ class NativeLib {
     external fun stringFromJNI(): String
 
     companion object {
-        // Used to load the 'native_gif_lib' library on application startup.
         init {
             System.loadLibrary("native_gif_lib")
         }
     }
+
+
 }
+
