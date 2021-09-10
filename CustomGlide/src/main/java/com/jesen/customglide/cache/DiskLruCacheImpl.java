@@ -129,7 +129,7 @@ public class DiskLruCacheImpl {
                 Value value = Value.getInstance();
                 // index 不能大于 VALUE_COUNT
                 inputStream = snapshot.getInputStream(0);
-               BitmapFactory.Options options = new BitmapFactory.Options();
+                BitmapFactory.Options options = new BitmapFactory.Options();
                 // 只获取图片的周围信息，内置会只获取图片的一部分而已，值获取高宽的信息 outW，outH
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeStream(inputStream, null, options);
