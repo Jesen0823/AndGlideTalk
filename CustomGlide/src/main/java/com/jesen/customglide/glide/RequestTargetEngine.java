@@ -14,6 +14,7 @@ import com.jesen.customglide.loaddata.LoadResponseListener;
 import com.jesen.customglide.resource.Key;
 import com.jesen.customglide.resource.Value;
 import com.jesen.customglide.resource.ValueCallback;
+import com.jesen.customglide.reusepool.ReusePoolImpl;
 
 /**
  * 真正的加载资源负责类
@@ -34,6 +35,9 @@ public class RequestTargetEngine implements LifeCycleCallback, ValueCallback, Me
     // 磁盘缓存
     private DiskLruCacheImpl diskLruCacheImpl;
 
+    // 内存复用池
+    private ReusePoolImpl reusePool;
+
     private String imgPath;
     private Context glideContext;
     private String key;
@@ -49,6 +53,10 @@ public class RequestTargetEngine implements LifeCycleCallback, ValueCallback, Me
         }
 
         diskLruCacheImpl = new DiskLruCacheImpl();
+
+        if (reusePool == null){
+            reusePool = new ReusePoolImpl(MEMORY_MAX_SIZE);
+        }
     }
 
     @Override
@@ -111,7 +119,7 @@ public class RequestTargetEngine implements LifeCycleCallback, ValueCallback, Me
         }
 
         // 磁盘查找
-        value = diskLruCacheImpl.get(key);
+        value = diskLruCacheImpl.get(key,reusePool);
         if (value != null){
             Log.d(TAG, "--checkCache, diskLruCacheImpl is find, key:"+key);
             activeCache.put(key,value);
@@ -143,6 +151,7 @@ public class RequestTargetEngine implements LifeCycleCallback, ValueCallback, Me
     public void entryRemovedMemoryCache(String key, Value oldValue) {
         Log.d(TAG,"--entryRemovedMemoryCache");
         // 添加到复用池
+        reusePool.put(oldValue.getmBitmap());
     }
 
     /**
