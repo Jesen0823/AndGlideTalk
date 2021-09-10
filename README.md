@@ -1,6 +1,17 @@
 # AndGlideTalk
 Android Glide
 
+模块[CustomGlide] 仿Glide自实现图片加载框架，包含生命周期管理，活动缓存，内存缓存，硬盘缓存和内存复用池。
+模块[MemoryReusePool] 单独模块，内存复用池的测试。
+
+
+0. Glide框架优势:
+ * 可配置度高，自适应度高;
+ * 支持多种数据源，本地，网路，assets gif在glide是支持的;3高效缓存，支持memory和disk图片缓存，默认使用二级缓存4高效处理Bitmap:使用Bitmap pool复用Bitmap
+ * 图片加载过程可以监听
+ * 生命周期集成到Glide
+
+![三级缓存原理](./images/README-1631240740369.png)
 
 1. Glide手写实现之资源封装
 
