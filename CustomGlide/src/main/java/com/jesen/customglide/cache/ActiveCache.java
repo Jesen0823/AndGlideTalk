@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 活动缓存 -- 真正被使用的资源
+ * 活动缓存 -- 正被使用的资源
  */
 public class ActiveCache {
 
@@ -22,7 +22,7 @@ public class ActiveCache {
     private ReferenceQueue<Value> queue; // 目的：为了监听这个弱引用 是否被回收了
     private boolean isCloseThread;
     private Thread thread;
-    private boolean isShoudonRemove;
+    private boolean isShoudonRemove;  // 手动移除
     private ValueCallback valueCallback;
 
     public ActiveCache(ValueCallback valueCallback) {
@@ -31,6 +31,7 @@ public class ActiveCache {
 
     /**
      * TODO 添加 活动缓存
+     *
      * @param key
      * @param value
      */
@@ -46,6 +47,7 @@ public class ActiveCache {
 
     /**
      * TODO 给外界获取Value
+     *
      * @param key
      * @return
      */
@@ -59,6 +61,7 @@ public class ActiveCache {
 
     /**
      * TODO 手动移除
+     *
      * @param key
      * @return
      */
@@ -109,6 +112,7 @@ public class ActiveCache {
 
     /**
      * 为了监听 弱引用被回收，被动移除的
+     *
      * @return
      */
     private ReferenceQueue<Value> getQueue() {
@@ -116,7 +120,7 @@ public class ActiveCache {
             queue = new ReferenceQueue<>();
 
             // 监听这个弱引用 是否被回收了
-            thread =  new Thread(){
+            thread = new Thread() {
                 @Override
                 public void run() {
                     super.run();
@@ -127,9 +131,10 @@ public class ActiveCache {
                             if (!isShoudonRemove) {
                                 // queue.remove(); 阻塞式的方法
 
-                                Reference<? extends Value> remove = queue.remove(); // 如果已经被回收了，就会执行到这个方法
+                                Reference<? extends Value> remove = queue.remove();
+                                // 如果已经被回收了，就会执行到这个方法
                                 CustomoWeakReference weakReference = (CustomoWeakReference) remove;
-                                // 移除容器     !isShoudonRemove：为了区分手动移除 和 被动移除
+                                // 移除容器  !isShoudonRemove：为了区分手动移除 和 被动移除
                                 if (mapList != null && !mapList.isEmpty()) {
                                     mapList.remove(weakReference.key);
                                 }
