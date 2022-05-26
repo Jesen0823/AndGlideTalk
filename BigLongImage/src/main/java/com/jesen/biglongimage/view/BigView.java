@@ -62,13 +62,13 @@ public class BigView extends View implements GestureDetector.OnGestureListener, 
     }
 
     // 设置图片
-    public void setImage(InputStream is){
+    public void setImage(InputStream is) {
         // 获取图片宽高
         mOptions.inJustDecodeBounds = true;
         mBitmap = BitmapFactory.decodeStream(is, null, mOptions);
         mImgWidth = mOptions.outWidth;
         mImgHeight = mOptions.outHeight;
-        Log.d(TAG, String.format("setImage, mImgWidth x mImgHeight= %d x %d", mImgWidth,mImgHeight));
+        Log.d(TAG, String.format("setImage, mImgWidth x mImgHeight= %d x %d", mImgWidth, mImgHeight));
 
         // 开启复用
         mOptions.inMutable = true;
@@ -98,16 +98,16 @@ public class BigView extends View implements GestureDetector.OnGestureListener, 
         mRect.top = 0;
         mRect.right = mImgWidth;
         // 计算缩放比例
-        mScale = mViewWidth/(float)mImgWidth;
-        Log.d(TAG,"onMeasure, mScale = "+mScale);
-        mRect.bottom = (int) (mViewHeight/mScale);
+        mScale = mViewWidth / (float) mImgWidth;
+        Log.d(TAG, "onMeasure, mScale = " + mScale);
+        mRect.bottom = (int) (mViewHeight / mScale);
     }
 
     // 绘制内容
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mRegionDecoder == null){
+        if (mRegionDecoder == null) {
             return;
         }
         // 内存复用
@@ -116,15 +116,15 @@ public class BigView extends View implements GestureDetector.OnGestureListener, 
         mBitmap = mRegionDecoder.decodeRegion(mRect, mOptions);
         // 缩放矩阵
         Matrix matrix = new Matrix();
-        matrix.setScale(mScale,mScale);
-        canvas.drawBitmap(mBitmap, matrix,mPaint);
+        matrix.setScale(mScale, mScale);
+        canvas.drawBitmap(mBitmap, matrix, mPaint);
 
     }
 
     @Override
     public boolean onDown(MotionEvent motionEvent) {
         // 如果移动没有停止，则强行停止
-        if (!mScroller.isFinished()){
+        if (!mScroller.isFinished()) {
             mScroller.forceFinished(true);
         }
         // 继续接收后续事件
@@ -142,22 +142,22 @@ public class BigView extends View implements GestureDetector.OnGestureListener, 
     }
 
     /**
-     *  event1:开始事件，手指按下
-     *  event2：当前事件
-     *  distanceX，distanceY xy轴移动的距离
-     * */
+     * event1:开始事件，手指按下
+     * event2：当前事件
+     * distanceX，distanceY xy轴移动的距离
+     */
     @Override
     public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX, float distanceY) {
         // 上下滑动时改变显示区域
         mRect.offset(0, (int) distanceY);
         // 滑动到了底部
-        if(mRect.bottom > mImgHeight){
+        if (mRect.bottom > mImgHeight) {
             mRect.bottom = mImgHeight;
-            mRect.top = (int) (mImgHeight - (mViewHeight/mScale));
+            mRect.top = (int) (mImgHeight - (mViewHeight / mScale));
         }
-        if(mRect.top < 0){
+        if (mRect.top < 0) {
             mRect.top = 0;
-            mRect.bottom = (int)(mViewHeight/mScale);
+            mRect.bottom = (int) (mViewHeight / mScale);
         }
         invalidate();
         return false;
@@ -170,28 +170,28 @@ public class BigView extends View implements GestureDetector.OnGestureListener, 
 
     /**
      * 处理滑动惯性
-     * */
+     */
     @Override
     public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float velocityX, float velocityY) {
         // maxY，y方向可滑动最大距离，= 图片高 - view的高
-        mScroller.fling(0,mRect.top, 0, -(int) velocityY,0,0,0,
-                mImgHeight-(int)(mViewHeight/mScale));
+        mScroller.fling(0, mRect.top, 0, -(int) velocityY, 0, 0, 0,
+                mImgHeight - (int) (mViewHeight / mScale));
         return false;
     }
 
     /**
      * 处理计算结果
-     * */
+     */
     @Override
     public void computeScroll() {
         // 滑动结束
-        if(mScroller.isFinished()){
+        if (mScroller.isFinished()) {
             return;
         }
         // 未结束
-        if (mScroller.computeScrollOffset()){
+        if (mScroller.computeScrollOffset()) {
             mRect.top = mScroller.getCurrY();
-            mRect.bottom = mRect.top + (int) (mViewHeight/mScale);
+            mRect.bottom = mRect.top + (int) (mViewHeight / mScale);
             invalidate();
         }
     }
